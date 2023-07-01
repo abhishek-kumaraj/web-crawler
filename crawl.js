@@ -4,23 +4,26 @@ const normalizeURL = (url)=>{
 
   // Normalize the scheme and hostname
   let normalizedURL = `${parsedURL.hostname}${parsedURL.pathname}`;
-  normalizedURL = normalizedURL.replace(/\/$/, '');
+  // normalizedURL = normalizedURL.replace(/\/$/, '');
+  if(normalizedURL.length > 0 && normalizedURL.slice(-1) === '/'){
+    return normalizedURL.slice(0,-1)
+  }
 
   return normalizedURL;
 }
 
-// const url1 = 'https://wagslane.dev/path/';
-// const url2 = 'https://wagsLane.Dev/path';
-// const url3 = 'https://wagslane.dev/path';
-// const url4 = 'http://wagslane.dev/path';
-
-// console.log(normalizeURL(url1)); // Output: wagslane.dev/path
-// console.log(normalizeURL(url2)); // Output: wagslane.dev/path
-// console.log(normalizeURL(url3)); // Output: wagslane.dev/path
-// console.log(normalizeURL(url4));
-
+const getURLsFromHTML = (htmlBody) =>{
+  const jsdom = require('jsdom')
+  const {JSDOM} = jsdom 
+  const dom = new JSDOM(htmlBody)
+  const linkElement = dom.window.document.querySelector('a');
+  const link = linkElement.href;
+  return htmlBody
+  
+}
 
 
 module.exports = {
-    normalizeURL
+    normalizeURL,
+    getURLsFromHTML
 }
