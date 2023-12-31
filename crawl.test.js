@@ -1,53 +1,62 @@
+const { normalizeURL, getURLsFromHTML } = require('./crawl.js')
 const { test, expect } = require('@jest/globals')
-const { normalizeURL } = require('./crawl.js')
-const { getURLsFromHTML } = require('./crawl.js')
 
-test('normalizeURL strip protocal and slash at the end', ()=>{
-    const input = 'https://wagslane.dev/'
-    const actual = normalizeURL(input)
-    const expected = 'wagslane.dev'
-    expect(actual).toEqual(expected)
+test('normalizeURL protocol', () => {
+  const input = 'https://blog.boot.dev/path'
+  const actual = normalizeURL(input)
+  const expected = 'blog.boot.dev/path'
+  expect(actual).toEqual(expected)
 })
 
-test('normalizeURL remove back slash from the end', ()=>{
-    const input = 'https://wagslane.dev/path/'
-    const actual = normalizeURL(input)
-    const expected = 'wagslane.dev/path'
-    expect(actual).toEqual(expected)
-})
-test('normalizeURL capitals', ()=>{
-    const input = 'https://WAGSLANE.dev/path/'
-    const actual = normalizeURL(input)
-    const expected = 'wagslane.dev/path'
-    expect(actual).toEqual(expected)
+test('normalizeURL slash', () => {
+  const input = 'https://blog.boot.dev/path/'
+  const actual = normalizeURL(input)
+  const expected = 'blog.boot.dev/path'
+  expect(actual).toEqual(expected)
 })
 
-test('normalizeURL remove http', ()=>{
-    const input = 'http://wagslane.dev/path/'
-    const actual = normalizeURL(input)
-    const expected = 'wagslane.dev/path'
-    expect(actual).toEqual(expected)
+test('normalizeURL capitals', () => {
+  const input = 'https://BLOG.boot.dev/path'
+  const actual = normalizeURL(input)
+  const expected = 'blog.boot.dev/path'
+  expect(actual).toEqual(expected)
 })
 
-test('get all url in normalizes form', ()=>{
-    const input = `
-    <html>
-        <body>
-            <a href="https://wagslane.dev/path"> lane </a>
-            <a href="http://wagslane.dev/path"> lane </a>
-            <a href="https://WAGSLANE.dev/path"> lane </a>
-            <a href="https://wagslane.dev/path/"> lane </a>
-            <a href="/path/"> lane </a>
-        </body>
-    </html>`
-    const actual = getURLsFromHTML(input,'https://wagslane.dev')
-    const expected = ['wagslane.dev/path','wagslane.dev/path','wagslane.dev/path','wagslane.dev/path','wagslane.dev/path']
-    expect(actual).toEqual(expected)
+test('normalizeURL http', () => {
+  const input = 'http://BLOG.boot.dev/path'
+  const actual = normalizeURL(input)
+  const expected = 'blog.boot.dev/path'
+  expect(actual).toEqual(expected)
 })
 
+test('getURLsFromHTML absolute', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="https://blog.boot.dev"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ 'https://blog.boot.dev/' ]
+  expect(actual).toEqual(expected)
+})
 
+test('getURLsFromHTML relative', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ 'https://blog.boot.dev/path/one' ]
+  expect(actual).toEqual(expected)
+})
 
+test('getURLsFromHTML both', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a><a href="https://other.com/path/one"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ 'https://blog.boot.dev/path/one', 'https://other.com/path/one' ]
+  expect(actual).toEqual(expected)
+})
 
-
-
-
+test('getURLsFromHTML handle error', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="path/one"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ ]
+  expect(actual).toEqual(expected)
+})
